@@ -11,6 +11,9 @@ compilertalk
 * lpeg for parsing: http://www.inf.puc-rio.br/~roberto/lpeg/
 * Specifically, the 're' library: http://www.inf.puc-rio.br/~roberto/lpeg/re.html
 
-## Contanct
+## Contact
 * @revivalizer on twitter
 * ralph splat deadfeed.net
+
+## Problems
+* In a few places, code on slides and actual source code is inconsistent. However, this should be minor stuff.
