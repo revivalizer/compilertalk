@@ -138,7 +138,7 @@ void vm_run(vm_program* program, opcode_t ip, constant_t* stack)
 				ip+=1;
 				break;
 			case kOpMinus:
-				stack[-1] = +stack[-1];
+				stack[-1] = -stack[-1];
 				ip+=1;
 				break;
 		}
