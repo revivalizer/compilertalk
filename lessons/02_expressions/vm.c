@@ -1,5 +1,7 @@
 #include "test.h"
+#include "stdint.h"
 #include "stdio.h"
+#include "math.h"
 
 // Define opcodes
 enum
@@ -83,7 +85,7 @@ void vm_run(vm_program* program, opcode_t ip, constant_t* stack)
 				ip+=1;
 				break;
 			case kOpModulo:
-				stack[-2] = stack[-2] % stack[-1];
+				stack[-2] = fmodf(stack[-2], stack[-1]);
 				stack--;
 				ip+=1;
 				break;
