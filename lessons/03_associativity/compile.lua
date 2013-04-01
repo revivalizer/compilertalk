@@ -11,6 +11,8 @@ function children(node)
 
 	if (node.tag=="binary_op") then
 		return ipairs({[1] = node.operand1, [2] = node.operand2})
+	elseif (node.tag=="unary_op") then
+		return ipairs({[1] = node.operand})
 	else
 		return function() return nil end
 	end
