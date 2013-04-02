@@ -94,7 +94,6 @@ end
 function check_expression(node)
 	if (node.tag=="function_call") then
 		local func = functions[node.identifier]
-THIS IS WRONG, ALSO NEEDS OTHER CHECKS
 
 		if (func.result~="number") then
 			error("Function '"..node.identifier.."' does not return a number.")
