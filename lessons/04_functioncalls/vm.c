@@ -1,4 +1,5 @@
 #include "test.h"
+#include "stdint.h"
 #include "stdio.h"
 #include "math.h"
 

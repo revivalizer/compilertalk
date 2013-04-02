@@ -1,4 +1,9 @@
+#ifdef TEST_MODE
+#include "testmode.h"
+#else
 #include "test.h"
+#endif
+#include "stdint.h"
 #include "stdio.h"
 
 // Define opcodes
@@ -56,9 +61,13 @@ void vm_run(vm_program* program, opcode_t ip, constant_t* stack)
 
 float vm_stack[1000];
 
-int main(void)
+int main(int argc, char* argv[])
 {
+#ifdef TEST_MODE
+	vm_program* program = update_vm_program((vm_program*)load(argv[1]));
+#else
 	vm_program* program = update_vm_program((vm_program*)vm_data_raw);
+#endif
 	vm_run(program, 0, vm_stack);
 
 	printf("VM result: %f\n", vm_stack[0]);
