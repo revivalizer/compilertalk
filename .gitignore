@@ -1,3 +1,8 @@
 test.bin
 test.h
 *.exe
+java_port/06_conditionals+loops/.classpath
+java_port/06_conditionals+loops/.project
+java_port/06_conditionals+loops/.settings
+java_port/06_conditionals+loops/bin
+java_port/06_conditionals+loops/target
