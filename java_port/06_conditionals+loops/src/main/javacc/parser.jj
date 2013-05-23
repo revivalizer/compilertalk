@@ -1,0 +1,330 @@
+options
+{
+  JDK_VERSION = "1.6";
+  STATIC = false;
+}
+
+PARSER_BEGIN(Parser)
+package compilertalk.parser;
+import java.util.*;
+import compilertalk.ast.*;
+
+public class Parser {}
+
+PARSER_END(Parser)
+
+// no need to scatter 'ws?' everywhere with this syntax:
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+TOKEN :
+{
+  < INTEGER : ([ "0"-"9" ])+ >
+| < OPEN_PARENS : "(" >
+| < CLOSE_PARENS : ")" >
+| < OPEN_BRACE : "{" >
+| < CLOSE_BRACE : "}" >
+| < SEMICOLON : ";" >
+| < COMMA : "," >
+| < PLUS : "+" >
+| < MINUS : "-" >
+| < MULTITIVE_OPERATORS : "*" | "/" | "%" >
+| < EQUALITY_OPERATORS : "==" | "!=" >
+| < RELATIONAL_OPERATORS : "<=" | ">=" | "<" | ">" >
+| < NOT :  "!">
+| < LOGICAL_AND : "&&" >
+| < LOGICAL_OR : "||" >
+| < EQUALS : "=" >
+| < IF: "if" >
+| < ELSE: "else" >
+| < WHILE: "while" >
+| < IDENTIFIER : [ "a"-"z", "A"-"Z" ] ([ "a"-"z", "A"-"Z", "0"-"9", "_" ])* >
+}
+
+List<AbstractNode> start() :
+{
+  List<AbstractNode> result; 
+}
+{
+  result = statement_list() < EOF >
+  { return result; }
+}
+
+List<AbstractNode> statement_list() :
+{
+  List<AbstractNode> result = new ArrayList<AbstractNode>();
+  AbstractNode statement;
+}
+{
+  (
+    statement = statement()
+    { result.add(statement); }
+  )*
+  { return result; }
+}
+
+AbstractNode statement() :
+{
+  AbstractNode result;
+}
+{
+  (
+    result = if_else_statement()
+  | result = while_statement()
+  | LOOKAHEAD(2) result = assign_statement()
+  | result = function_call_statement()
+  )
+  { return result; }
+}
+
+List <AbstractNode> block() :
+{
+  List <AbstractNode> result;
+  AbstractNode statement;
+}
+{
+  (
+    < OPEN_BRACE > result = statement_list() < CLOSE_BRACE >
+  | statement = statement()
+    {
+      result = new ArrayList < AbstractNode > ();
+      result.add(statement);
+    }
+  )
+  { return result; }
+}
+
+AssignStatementNode assign_statement() :
+{
+  Token identifier;
+  AbstractExpressionNode expression;
+}
+{
+  identifier = < IDENTIFIER > < EQUALS > expression = expression() < SEMICOLON >
+  { return new AssignStatementNode(identifier.image, expression); }
+}
+
+FunctionCallStatementNode function_call_statement() :
+{
+  FunctionCallNode result;
+}
+{
+  result = function_call() < SEMICOLON >
+  { return new FunctionCallStatementNode(result); }
+}
+
+IfStatementNode if_else_statement() :
+{
+  AbstractExpressionNode expression;
+  List<AbstractNode> if_block;
+  List<AbstractNode> else_block = null;
+}
+{
+  < IF > < OPEN_PARENS > expression = expression() < CLOSE_PARENS > if_block = block()
+  (
+    LOOKAHEAD(1) < ELSE > else_block = block()
+  )?
+  {
+    return new IfStatementNode(expression, if_block, else_block);
+  }
+}
+
+WhileStatementNode while_statement() :
+{
+  AbstractExpressionNode expression;
+  List<AbstractNode> block;
+}
+{
+  < WHILE > < OPEN_PARENS > expression = expression() < CLOSE_PARENS > block = block()
+  { return new WhileStatementNode(expression, block); }
+}
+
+AbstractExpressionNode expression() :
+{
+  AbstractExpressionNode result;
+}
+{
+  result = logical_or()
+  { return result; }
+}
+
+AbstractExpressionNode logical_or() :
+{
+  AbstractExpressionNode result;
+  AbstractExpressionNode operand2;
+}
+{
+  result = logical_and()
+  (
+    < LOGICAL_OR > operand2 = logical_and()
+    { result = new BinaryOperatorNode(result, BinaryOperatorNode.Operator.LOGICAL_OR, operand2); }
+  )*
+  { return result; }
+}
+
+AbstractExpressionNode logical_and() :
+{
+  AbstractExpressionNode result;
+  AbstractExpressionNode operand2;
+}
+{
+  result = equality()
+  (
+    < LOGICAL_AND > operand2 = equality()
+    { result = new BinaryOperatorNode(result, BinaryOperatorNode.Operator.LOGICAL_AND, operand2); }
+  )*
+  {
+    return result;
+  }
+}
+
+AbstractExpressionNode equality() :
+{
+  AbstractExpressionNode result;
+  Token op;
+  AbstractExpressionNode operand2;
+}
+{
+  result = relational()
+  (
+    op = < EQUALITY_OPERATORS >
+    operand2 = relational()
+    { result = new BinaryOperatorNode(result, op.image, operand2); }
+  )*
+  { return result; }
+}
+
+AbstractExpressionNode relational() :
+{
+  AbstractExpressionNode result;
+  Token op;
+  AbstractExpressionNode operand2;
+}
+{
+  result = additive()
+  (
+    op = < RELATIONAL_OPERATORS >
+    operand2 = additive()
+    { result = new BinaryOperatorNode(result, op.image, operand2); }
+  )*
+  { return result; }
+}
+
+AbstractExpressionNode additive() :
+{
+  AbstractExpressionNode result;
+  Token op;
+  AbstractExpressionNode operand2;
+}
+{
+  result = multitive()
+  (
+    (
+      op = < PLUS >
+    | op = < MINUS >
+    )
+    operand2 = multitive()
+    { result = new BinaryOperatorNode(result, op.image, operand2); }
+  )*
+  { return result; }
+}
+
+AbstractExpressionNode multitive() :
+{
+  AbstractExpressionNode result;
+  Token op;
+  AbstractExpressionNode operand2;
+}
+{
+  result = unary()
+  (
+    op = < MULTITIVE_OPERATORS >
+    operand2 = unary()
+    { result = new BinaryOperatorNode(result, op.image, operand2); }
+  )*
+  { return result; }
+}
+
+AbstractExpressionNode unary() :
+{
+  Token operator;
+  AbstractExpressionNode result;
+}
+{
+  (
+    (
+      operator = < NOT >
+    | operator = < PLUS >
+    | operator = < MINUS >
+	)
+    result = unary()
+    {
+      result = new UnaryOperatorNode(UnaryOperatorNode.Operator.fromChar(operator.image.charAt(0)), result);
+    }
+  | result = primary()
+  )
+  { return result; }
+}
+
+AbstractExpressionNode primary() :
+{
+  AbstractExpressionNode result;
+}
+{
+  (  
+    result = integer()
+  | LOOKAHEAD(2) result = function_call()
+  | result = variable()
+  | < OPEN_PARENS > result = expression() < CLOSE_PARENS >
+  )
+  { return result; }
+}
+
+FunctionCallNode function_call() :
+{
+  Token id;
+  List<AbstractExpressionNode> arguments;
+}
+{
+  id = < IDENTIFIER >
+  < OPEN_PARENS > arguments = function_call_arguments() < CLOSE_PARENS >
+  { return new FunctionCallNode(id.image, arguments); }
+}
+
+List<AbstractExpressionNode> function_call_arguments() :
+{
+  List<AbstractExpressionNode> values = new ArrayList<AbstractExpressionNode>();
+  AbstractExpressionNode node;
+}
+{
+  node = expression()
+  { values.add(node); }
+  (
+    < COMMA > node = expression()
+    { values.add(node); }
+  )*
+  { return values; }
+}
+
+VariableNode variable() :
+{
+  Token id;
+}
+{
+  id = < IDENTIFIER >
+  { return new VariableNode(id.image); }
+}
+
+LiteralNode integer() :
+{
+  Token literal;
+}
+{
+  literal = < INTEGER >
+  { return new LiteralNode(Integer.parseInt(literal.image)); }
+}
