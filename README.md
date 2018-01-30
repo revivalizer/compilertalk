@@ -10,6 +10,7 @@ compilertalk
 ## Resources
 * lpeg for parsing: http://www.inf.puc-rio.br/~roberto/lpeg/
 * Specifically, the 're' library: http://www.inf.puc-rio.br/~roberto/lpeg/re.html
+* The entire talk on youtube: https://youtu.be/GSzoG8DAJEE
 
 ## Contact
 * @revivalizer on twitter
