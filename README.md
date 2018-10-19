@@ -10,6 +10,7 @@ compilertalk
 ## Resources
 * lpeg for parsing: http://www.inf.puc-rio.br/~roberto/lpeg/
 * Specifically, the 're' library: http://www.inf.puc-rio.br/~roberto/lpeg/re.html
+* lpack (required by util/export.lua) http://tecgraf.puc-rio.br/~lhf/ftp/lua/#lpack
 * The entire talk on youtube: https://youtu.be/GSzoG8DAJEE
 
 ## Contact
