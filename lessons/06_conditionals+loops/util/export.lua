@@ -12,6 +12,7 @@
 ]]
 
 require("pack")
+unpack = table.unpack or unpack
 
 function generate_data(program)
 	-- Generate arrays of data in strings, using the pack library
